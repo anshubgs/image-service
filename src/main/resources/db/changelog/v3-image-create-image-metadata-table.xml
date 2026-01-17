@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="003-create-image-metadata-table" author="anshu">
+
+        <createTable tableName="image_metadata" schemaName="image">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="uuid" type="UUID">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="image_uuid" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="original_filename" type="VARCHAR(255)"/>
+            <column name="content_type" type="VARCHAR(50)"/>
+            <column name="file_size" type="BIGINT"/>
+
+            <column name="image_url" type="TEXT"/>
+            <column name="thumbnail_url" type="TEXT"/>
+
+            <column name="width" type="INT"/>
+            <column name="height" type="INT"/>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <!-- FK: image_metadata → image (UUID based) -->
+        <addForeignKeyConstraint
+                constraintName="fk_image_metadata_image"
+                baseTableSchemaName="image"
+                baseTableName="image_metadata"
+                baseColumnNames="image_uuid"
+                referencedTableName="image"
+                referencedColumnNames="uuid"/>
+
+    </changeSet>
+
+</databaseChangeLog>
