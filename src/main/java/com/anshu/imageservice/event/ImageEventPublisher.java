@@ -1,4 +1,8 @@
 package com.anshu.imageservice.event;
 
-public class ImageEventPublisher {
+/**
+ * Abstraction so Kafka/Redis can be swapped
+ */
+public interface ImageEventPublisher {
+    void publish(ImageUploadedEvent event);
 }

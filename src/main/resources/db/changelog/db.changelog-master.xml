@@ -10,5 +10,7 @@
     <include file="db/changelog/v1-image-create-device-cache.xml"/>
     <include file="db/changelog/v2-image-create-image-table.xml"/>
     <include file="db/changelog/v3-image-create-image-metadata-table.xml"/>
+    <include file="db/changelog/v4-image-insertDataInCachedDevice.xml"/>
+
 
 </databaseChangeLog>
