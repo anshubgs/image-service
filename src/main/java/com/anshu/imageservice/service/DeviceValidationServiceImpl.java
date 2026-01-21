@@ -24,10 +24,25 @@ public class DeviceValidationServiceImpl implements DeviceValidationService{
         DeviceCache device = repo.findByUuid(deviceUuid)
                 .orElseThrow(() -> new DeviceNotFoundException("Device not registered"));
 
-        if(!device.getDeviceSecret().equals(deviceSecret)){
+        if (deviceSecret == null ||
+                !device.getDeviceSecret().equals(deviceSecret)) {
             throw new InvalidDeviceSecretException("Invalid device secret");
         }
+        validateStatus(device);
 
+
+    }
+
+    @Override
+    public void validateDevice(UUID deviceUuid) {
+
+        DeviceCache device = repo.findByUuid(deviceUuid)
+                .orElseThrow(() -> new DeviceNotFoundException("Device not registered"));
+
+        validateStatus(device);
+    }
+
+    private void validateStatus(DeviceCache device) {
         if(!"ACTIVE".equalsIgnoreCase(device.getStatus())){
             throw new DeviceInactiveException("Device not active");
         }

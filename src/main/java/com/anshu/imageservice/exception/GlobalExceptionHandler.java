@@ -32,6 +32,11 @@ public class GlobalExceptionHandler {
         return build("Internal Server Error" , HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(ImageNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handle(ImageNotFoundException ex){
+        return build(ex.getMessage(),HttpStatus.NOT_FOUND);
+    }
+
     private ResponseEntity<ErrorResponse> build(String msg, HttpStatus status) {
         return ResponseEntity.status(status).body(
                 ErrorResponse.builder()
