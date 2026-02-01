@@ -1,5 +1,6 @@
 package com.anshu.imageservice.service;
 
+import com.anshu.imageservice.client.DeviceServiceClient;
 import com.anshu.imageservice.dto.ImageResponse;
 import com.anshu.imageservice.exception.ImageNotFoundException;
 import com.anshu.imageservice.model.Image;
@@ -29,13 +30,16 @@ public class ImageQueryServiceImpl implements ImageQueryService {
     private final ImageRepository imageRepository;
     private final ImageMetadataRepository metadataRepository;
     private final DeviceValidationService validateDevice;
+    private final DeviceServiceClient serviceClient;
 
     public ImageQueryServiceImpl(
             ImageRepository imageRepository,
-            ImageMetadataRepository metadataRepository,DeviceValidationService validateDevice) {
+            ImageMetadataRepository metadataRepository,DeviceValidationService validateDevice,
+            DeviceServiceClient serviceClient) {
         this.imageRepository = imageRepository;
         this.metadataRepository = metadataRepository;
         this.validateDevice = validateDevice;
+        this.serviceClient = serviceClient;
     }
 
     // 🔹 View image (NO cache)
@@ -53,36 +57,12 @@ public class ImageQueryServiceImpl implements ImageQueryService {
         return map(img, meta);
     }
 
-    // 🔹 Latest image (Redis cached – 60s)
-   /* @Override
-    @Cacheable(
-            value = "latestImage",
-            key = "#deviceUuid",
-            unless = "#result == null"
-    )
-    public ImageResponse getLatestImage(UUID deviceUuid) {
-
-        validateDevice.validateDevice(deviceUuid);
-
-        log.info("[CACHE MISS] latest image for device={}", deviceUuid);
-
-        Image img = imageRepository
-                .findTopByDeviceUuidOrderByCapturedAtDesc(deviceUuid)
-                .orElseThrow(() ->
-                        new ImageNotFoundException("No image found"));
-
-        ImageMetadata meta =
-                metadataRepository.findByImageUuid(img.getUuid())
-                        .orElse(null);
-
-        return map(img, meta);
-    }*/
-
     @Override
     public ImageResponse getLatestImage(UUID deviceUuid) {
 
         // 1️⃣ Validate device
-        validateDevice.validateDevice(deviceUuid);
+       // validateDevice.validateDevice(deviceUuid);
+        serviceClient.validateDevice(deviceUuid,null);
 
         String cacheKey = "latest:" + deviceUuid;
 
@@ -113,32 +93,12 @@ public class ImageQueryServiceImpl implements ImageQueryService {
     }
 
 
-
-    // 🔹 Timeline
-//    @Override
-//    public List<ImageResponse> listImages(
-//            UUID deviceUuid,
-//            Pageable pageable) {
-//
-//        return imageRepository
-//                .findByDeviceUuid(deviceUuid, pageable)
-//                .getContent()
-//                .stream()
-//                .map(img -> {
-//                    ImageMetadata meta =
-//                            metadataRepository
-//                                    .findByImageUuid(img.getUuid())
-//                                    .orElse(null);
-//                    return map(img, meta);
-//                })
-//                .toList();
-//    }
-
     @Override
     public List<ImageResponse> listImages(UUID deviceUuid, Pageable pageable) {
 
         // 🔐 1️⃣ Validate device first
-        validateDevice.validateDevice(deviceUuid);
+       // validateDevice.validateDevice(deviceUuid);
+        serviceClient.validateDevice(deviceUuid,null);
 
         List<Image> images =
                 imageRepository.findByDeviceUuid(deviceUuid, pageable).getContent();

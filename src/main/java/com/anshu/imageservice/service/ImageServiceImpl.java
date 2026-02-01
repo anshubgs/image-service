@@ -1,5 +1,6 @@
 package com.anshu.imageservice.service;
 
+import com.anshu.imageservice.client.DeviceServiceClient;
 import com.anshu.imageservice.dto.ImageUploadResponse;
 import com.anshu.imageservice.event.ImageEventPublisher;
 import com.anshu.imageservice.event.ImageUploadedEvent;
@@ -22,15 +23,17 @@ public class ImageServiceImpl implements ImageService {
     private static final long MIN_FREE_SPACE =50*1024*1024;
 
     private final DeviceValidationService deviceValidationService;
+    private final DeviceServiceClient serviceClient;
     private final ImageEventPublisher eventPublisher;
     /*private final ImageRepository imageRepository;
     private final ImageMetadataRepository metadataRepository;
     private final StorageService storageService;*/
 
     public ImageServiceImpl(DeviceValidationService deviceValidationService,
-                          ImageEventPublisher eventPublisher) {
+                          ImageEventPublisher eventPublisher,DeviceServiceClient serviceClient) {
         this.deviceValidationService = deviceValidationService;
         this.eventPublisher = eventPublisher;
+        this.serviceClient = serviceClient;
     }
 
 
@@ -40,7 +43,8 @@ public class ImageServiceImpl implements ImageService {
                                            byte[] imageBytes) {
 
         // 1. Validate device
-        deviceValidationService.validateDevice(deviceUuid, deviceSecret);
+        //deviceValidationService.validateDevice(deviceUuid, deviceSecret);
+        serviceClient.validateDevice(deviceUuid, deviceSecret);
 
         // Generate unique IDs for image and its metadata
         UUID imageUuid = UUID.randomUUID();

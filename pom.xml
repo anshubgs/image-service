@@ -21,16 +21,18 @@
 
     <properties>
         <java.version>21</java.version>
+        <!-- ✅ Spring Cloud GCP compatible with Boot 3.x -->
+        <spring-cloud-gcp.version>5.4.1</spring-cloud-gcp.version>
     </properties>
 
     <!-- ================= DEPENDENCY MANAGEMENT ================= -->
     <dependencyManagement>
         <dependencies>
-            <!-- Google Cloud BOM for all GCP libs -->
+            <!-- ✅ Spring Cloud GCP BOM (REQUIRED) -->
             <dependency>
                 <groupId>com.google.cloud</groupId>
-                <artifactId>libraries-bom</artifactId>
-                <version>26.40.0</version>
+                <artifactId>spring-cloud-gcp-dependencies</artifactId>
+                <version>${spring-cloud-gcp.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -80,9 +82,40 @@
         </dependency>
 
         <!-- ================= GCP ================= -->
+
+        <!-- ✅ Pub/Sub SUBSCRIBER -->
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
+        </dependency>
+
+        <!-- GCS (already correct) -->
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-storage</artifactId>
+        </dependency>
+
+        <!-- ================= REDIS ================= -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- Redis client -->
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
+        </dependency>
+
+        <!-- ================= JACKSON ================= -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
         <!-- ================= DEV / TEST ================= -->
@@ -106,40 +139,19 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- ================= SWAGGER / OPENAPI ================= -->
+        <!-- ================= OPENAPI ================= -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.2.0</version>
         </dependency>
 
+        <!-- Spring Integration (REQUIRED for MessageChannel / DirectChannel) -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-core</artifactId>
         </dependency>
 
-        <!-- ================= REDIS ================= -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-
-        <!-- Redis client (Lettuce - REQUIRED for Streams) -->
-        <dependency>
-            <groupId>io.lettuce</groupId>
-            <artifactId>lettuce-core</artifactId>
-        </dependency>
-
-        <!-- Jackson (for Redis Stream serialization) -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
 
     </dependencies>
 
@@ -147,7 +159,6 @@
     <build>
         <plugins>
 
-            <!-- Maven Compiler Plugin (Lombok fix included) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -165,7 +176,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
