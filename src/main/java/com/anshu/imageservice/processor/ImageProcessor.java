@@ -40,11 +40,11 @@ public class ImageProcessor {
             return;
         }
 
-        Path tempPath = Paths.get(event.tempPath());
-        byte[] bytes = Files.readAllBytes(tempPath);
+        // ✅ Instead of local temp file, use objectPath (GCS path)
+        String objectPath = event.objectPath();
 
-        String imageUrl =
-                storageService.store(bytes, event.imageUuid().toString());
+        // If you want bytes (optional, GCS storageService might provide method to download)
+        // byte[] bytes = storageService.download(objectPath); // implement this if needed
 
         imageRepository.save(
                 Image.builder()
@@ -61,14 +61,13 @@ public class ImageProcessor {
                         .uuid(event.metadataUuid())
                         .imageUuid(event.imageUuid())
                         .contentType("image/jpeg")
-                        .fileSize((long) bytes.length)
-                        .imageUrl(imageUrl)
+                        .fileSize(null) // optional: fetch from GCS if needed
+                        .imageUrl(objectPath) // GCS object path
                         .createdAt(event.capturedAt())
                         .build()
         );
 
-        Files.deleteIfExists(tempPath);
-
         log.info("[DONE] Image processed {}", event.imageUuid());
     }
+
 }

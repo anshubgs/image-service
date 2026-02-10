@@ -5,6 +5,12 @@ import com.anshu.imageservice.dto.ImageUploadResponse;
 import com.anshu.imageservice.event.ImageEventPublisher;
 import com.anshu.imageservice.event.ImageUploadedEvent;
 import com.anshu.imageservice.model.Image;
+import com.anshu.imageservice.model.ImageMetadata;
+import com.anshu.imageservice.repository.ImageMetadataRepository;
+import com.anshu.imageservice.repository.ImageRepository;
+
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -25,63 +31,92 @@ public class ImageServiceImpl implements ImageService {
     private final DeviceValidationService deviceValidationService;
     private final DeviceServiceClient serviceClient;
     private final ImageEventPublisher eventPublisher;
+    private final StorageService storageService;
+    private final ImageMetadataRepository imageMetadataRepository;
+    private final ImageRepository imageRepository;
+
     /*private final ImageRepository imageRepository;
     private final ImageMetadataRepository metadataRepository;
     private final StorageService storageService;*/
 
     public ImageServiceImpl(DeviceValidationService deviceValidationService,
-                          ImageEventPublisher eventPublisher,DeviceServiceClient serviceClient) {
+                          ImageEventPublisher eventPublisher,DeviceServiceClient serviceClient,StorageService storageService,
+                          ImageMetadataRepository imageMetadataRepository,ImageRepository imageRepository) {
         this.deviceValidationService = deviceValidationService;
         this.eventPublisher = eventPublisher;
         this.serviceClient = serviceClient;
+        this.storageService = storageService;
+        this.imageMetadataRepository = imageMetadataRepository;
+        this.imageRepository = imageRepository;
     }
 
 
     @Override
-    public ImageUploadResponse uploadImage(UUID deviceUuid,
-                                           String deviceSecret,
-                                           byte[] imageBytes) {
+    @Transactional
+    public ImageUploadResponse uploadImage(
+            UUID deviceUuid,
+            String deviceSecret,
+            byte[] imageBytes
+    ) {
 
-        // 1. Validate device
-        //deviceValidationService.validateDevice(deviceUuid, deviceSecret);
+        // 1️⃣ Validate device
         serviceClient.validateDevice(deviceUuid, deviceSecret);
 
-        // Generate unique IDs for image and its metadata
         UUID imageUuid = UUID.randomUUID();
         UUID metadataUuid = UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
-        // Save image temporarily to disk
-        try {
-            // Create the directory if it doesn't exist
-            Path tempDir = Paths.get("/tmp/images");
-            // Check if there is enough free space in the temp directory
-            Files.createDirectories(
-                    tempDir
-            );
-            if (tempDir.toFile().getUsableSpace() < MIN_FREE_SPACE) {
-                throw new RuntimeException("Temp storage full");
-            }
+        // 2️⃣ Upload to GCS
+        String gcsPath =
+                storageService.store(imageBytes, deviceUuid, imageUuid);
 
-            Path tempFile = tempDir.resolve(imageUuid + ".jpg");
-            Files.write(tempFile, imageBytes);
+        log.info("[GCS] Image uploaded | image={} | path={}", imageUuid, gcsPath);
 
-            //publish Event
-            eventPublisher.publish(new ImageUploadedEvent(
-                    imageUuid, metadataUuid, deviceUuid, tempFile.toString(), now));
+        // 3️⃣ INSERT INTO IMAGE (PARENT)
+        Image image = Image.builder()
+                .uuid(imageUuid)
+                .deviceUuid(deviceUuid)
+                .status("UPLOADED")
+                .capturedAt(now)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
 
-            log.info("[EVENT] Published {}", imageUuid);
+        imageRepository.save(image);
 
-            //return Response
-            return ImageUploadResponse.builder()
-                    .imageMetadataUuid(metadataUuid)
-                    .status("RECEIVED")
-                    .createdAt(now)
-                    .build();
+        log.info("[IMAGE] Image row inserted | image={}", imageUuid);
 
-        } catch (IOException e) {
-            log.error("[TEMP] Write failed", e);
-            throw new RuntimeException("Image intake failed");
-        }
+        // 4️⃣ INSERT INTO IMAGE_METADATA (CHILD)
+        ImageMetadata metadata = ImageMetadata.builder()
+                .uuid(metadataUuid)
+                .imageUuid(imageUuid)
+                .deviceUuid(deviceUuid)
+                .originalFilename(imageUuid + ".jpg")
+                .contentType("image/jpeg")
+                .fileSize((long) imageBytes.length)
+                .imageUrl(gcsPath)     // ✅ CORRECT
+                .thumbnailUrl(null)    // async later
+                .createdAt(now)
+                .build();
+
+        imageMetadataRepository.save(metadata);
+
+        log.info("[METADATA] Saved | image={} | device={}", imageUuid, deviceUuid);
+
+        // 5️⃣ Publish event
+        eventPublisher.publish(new ImageUploadedEvent(
+                imageUuid,
+                metadataUuid,
+                deviceUuid,
+                gcsPath,
+                now
+        ));
+
+        return ImageUploadResponse.builder()
+                .imageMetadataUuid(metadataUuid)
+                .status("UPLOADED")
+                .createdAt(now)
+                .build();
     }
+
 }

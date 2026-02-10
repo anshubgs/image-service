@@ -15,4 +15,9 @@ public interface ImageMetadataRepository extends JpaRepository<ImageMetadata, Lo
 
     // ✅ N+1 FIX — single query
     List<ImageMetadata> findByImageUuidIn(List<UUID> imageUuids);
+    
+ // latest image for device
+    Optional<ImageMetadata>
+    findTopByDeviceUuidOrderByCreatedAtDesc(UUID deviceUuid);
+
 }

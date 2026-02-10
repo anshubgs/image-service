@@ -1,50 +1,58 @@
 package com.anshu.imageservice.service;
 
-import com.anshu.imageservice.service.StorageService;
-//import com.google.cloud.storage.BlobInfo;
-//import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.BlobId;
+import java.util.UUID;
+
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@Profile("gcp")   // gcp profile pe activate hoga
 @Slf4j
-public class GcpStorageServiceImpl {
+public class GcpStorageServiceImpl implements StorageService {
 
-   /* private final Storage storage;
+    private final Storage storage;
 
-    @Value("${gcp.bucket.name}")
+    @Value("${gcs.bucket.name}")
     private String bucketName;
+
+    @Value("${gcs.object.base-path:devices}")
+    private String basePath;
 
     public GcpStorageServiceImpl(Storage storage) {
         this.storage = storage;
     }
 
     @Override
-    public String store(MultipartFile file, String imageUuid) {
+    public String store(byte[] imageBytes, UUID deviceUuid, UUID imageUuid) {
 
         try {
-            String objectName = "images/" + imageUuid + ".jpg";
+            String objectName =
+                    basePath + "/" + deviceUuid + "/" + imageUuid + ".jpg";
 
-            BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, objectName)
-                    .setContentType(file.getContentType())
+            BlobId blobId = BlobId.of(bucketName, objectName);
+
+            BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
+                    .setContentType("image/jpeg")
                     .build();
 
-            storage.create(blobInfo, file.getBytes());
+            storage.create(blobInfo, imageBytes);
 
-            String publicUrl =
-                    "https://storage.googleapis.com/" + bucketName + "/" + objectName;
+            log.info("[GCS] Image uploaded | bucket={} | object={}",
+                    bucketName, objectName);
 
-            log.info("Image uploaded to GCP bucket {}", publicUrl);
-
-            return publicUrl;
+            // ✅ RETURN ONLY OBJECT PATH
+            return objectName;
 
         } catch (Exception e) {
-            log.error("GCP image upload failed", e);
-            throw new RuntimeException("Failed to upload image to GCP");
+            log.error("[GCS] Image upload failed", e);
+            throw new RuntimeException("Failed to upload image to GCS");
         }
-    }*/
+    }
+
 }

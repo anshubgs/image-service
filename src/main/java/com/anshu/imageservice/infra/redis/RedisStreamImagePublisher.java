@@ -30,7 +30,8 @@ public class RedisStreamImagePublisher implements ImageEventPublisher {
                 "imageUuid", event.imageUuid().toString(),
                 "metadataUuid", event.metadataUuid().toString(),
                 "deviceUuid", event.deviceUuid().toString(),
-                "tempPath", event.tempPath(),
+                "objectPath", event.objectPath(),
+                //"tempPath", event.tempPath(),
                 "capturedAt", event.capturedAt().toString()
         ));
 

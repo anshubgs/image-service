@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <!-- ===================================================== -->
+    <!-- Add device_uuid column to image_metadata table -->
+    <!-- ===================================================== -->
+    <changeSet id="add-device-uuid-to-image-metadata-001"
+               author="anshu">
+
+        <!-- Step 1: add column (nullable first for safety) -->
+        <addColumn tableName="image_metadata" schemaName="image">
+            <column name="device_uuid" type="UUID">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <!-- Step 2: add index for fast lookup -->
+        <createIndex
+                indexName="idx_image_metadata_device_uuid"
+                tableName="image_metadata"
+                schemaName="image">
+            <column name="device_uuid"/>
+        </createIndex>
+
+        <!-- Step 3: (OPTIONAL) make column NOT NULL later -->
+        <!--
+        <addNotNullConstraint
+                tableName="image_metadata"
+                schemaName="image"
+                columnName="device_uuid"
+                columnDataType="UUID"/>
+        -->
+
+    </changeSet>
+
+</databaseChangeLog>

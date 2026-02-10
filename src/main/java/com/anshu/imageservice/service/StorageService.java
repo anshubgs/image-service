@@ -1,7 +1,13 @@
 package com.anshu.imageservice.service;
 
-import org.springframework.web.multipart.MultipartFile;
+import java.util.UUID;
 
 public interface StorageService {
-    String store(/*MultipartFile file*/  byte[] imageBytes, String imageUuid);
+
+    /**
+     * @return stored object path or identifier (not public URL)
+     */
+  //  String store(byte[] imageBytes, String imageUuid);
+
+	String store(byte[] imageBytes, UUID deviceUuid, UUID imageUuid);
 }
