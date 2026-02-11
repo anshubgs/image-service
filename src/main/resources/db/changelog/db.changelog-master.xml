@@ -14,7 +14,8 @@
       <include file="db/changelog/v5-image-create-cached-user-table.xml"/>
        <include file="db/changelog/v6-image-add-device-uuid-to-image-metadata.xml"/>
               <include file="db/changelog/v7-image-create-device-summary.xml"/>
-       
+               <include file="db/changelog/v8-image-create-image-uploaded-event.xml"/>
+     
 
 
 </databaseChangeLog>

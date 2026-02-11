@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+	<changeSet id="20260210-03-create-image-uploaded-event"
+		author="anshu">
+
+		<createTable tableName="image_uploaded_event" schemaName="image">
+			<!-- Surrogate PK -->
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+
+			<!-- Event UUID -->
+			<column name="event_uuid" type="UUID">
+				<constraints nullable="false" unique="true" />
+			</column>
+
+			<!-- Device reference -->
+			<column name="device_uuid" type="UUID">
+				<constraints nullable="false" />
+			</column>
+
+			<!-- Image reference -->
+			<column name="image_uuid" type="UUID">
+				<constraints nullable="false" />
+			</column>
+
+			<!-- Metadata reference -->
+			<column name="metadata_uuid" type="UUID">
+				<constraints nullable="false" />
+			</column>
+
+			<!-- Object path (GCS) -->
+			<column name="object_path" type="VARCHAR(500)">
+				<constraints nullable="false" />
+			</column>
+
+			<!-- Captured timestamp -->
+			<column name="captured_at" type="TIMESTAMP">
+				<constraints nullable="false" />
+			</column>
+
+			<!-- Processed flag -->
+			<column name="processed" type="BOOLEAN" defaultValueBoolean="false">
+				<constraints nullable="false" />
+			</column>
+
+			<!-- Created timestamp -->
+			<column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+				<constraints nullable="false" />
+			</column>
+
+		</createTable>
+
+		<!-- Index on device_uuid for querying -->
+		<createIndex indexName="idx_image_uploaded_event_device"
+			schemaName="image" tableName="image_uploaded_event">
+			<column name="device_uuid"/>
+		</createIndex>
+
+		<!-- Index on processed for unprocessed events -->
+		<createIndex indexName="idx_image_uploaded_event_processed"
+			schemaName="image" tableName="image_uploaded_event">
+			<column name="processed"/>
+		</createIndex>
+
+	</changeSet>
+
+</databaseChangeLog>

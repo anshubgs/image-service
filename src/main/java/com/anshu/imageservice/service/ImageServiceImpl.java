@@ -1,8 +1,11 @@
 package com.anshu.imageservice.service;
 
 import com.anshu.imageservice.client.DeviceServiceClient;
+import com.anshu.imageservice.core.infrastructure.messaging.ImageSavedEventPublisher;
+import com.anshu.imageservice.core.infrastructure.repository.DeviceSummaryJpaRepository;
 import com.anshu.imageservice.dto.ImageUploadResponse;
 import com.anshu.imageservice.event.ImageEventPublisher;
+import com.anshu.imageservice.event.ImageSavedEvent;
 import com.anshu.imageservice.event.ImageUploadedEvent;
 import com.anshu.imageservice.model.Image;
 import com.anshu.imageservice.model.ImageMetadata;
@@ -30,24 +33,28 @@ public class ImageServiceImpl implements ImageService {
 
     private final DeviceValidationService deviceValidationService;
     private final DeviceServiceClient serviceClient;
-    private final ImageEventPublisher eventPublisher;
+   // private final ImageEventPublisher eventPublisher;
     private final StorageService storageService;
     private final ImageMetadataRepository imageMetadataRepository;
     private final ImageRepository imageRepository;
+    private final ImageSavedEventPublisher eventPublisher;
+    private final DeviceSummaryJpaRepository jpaRepo;
+
 
     /*private final ImageRepository imageRepository;
     private final ImageMetadataRepository metadataRepository;
     private final StorageService storageService;*/
 
     public ImageServiceImpl(DeviceValidationService deviceValidationService,
-                          ImageEventPublisher eventPublisher,DeviceServiceClient serviceClient,StorageService storageService,
-                          ImageMetadataRepository imageMetadataRepository,ImageRepository imageRepository) {
+    		ImageSavedEventPublisher eventPublisher,DeviceServiceClient serviceClient,StorageService storageService,
+                          ImageMetadataRepository imageMetadataRepository,ImageRepository imageRepository,DeviceSummaryJpaRepository jpaRepo) {
         this.deviceValidationService = deviceValidationService;
         this.eventPublisher = eventPublisher;
         this.serviceClient = serviceClient;
         this.storageService = storageService;
         this.imageMetadataRepository = imageMetadataRepository;
         this.imageRepository = imageRepository;
+        this.jpaRepo = jpaRepo;
     }
 
 
@@ -104,13 +111,27 @@ public class ImageServiceImpl implements ImageService {
         log.info("[METADATA] Saved | image={} | device={}", imageUuid, deviceUuid);
 
         // 5️⃣ Publish event
-        eventPublisher.publish(new ImageUploadedEvent(
-                imageUuid,
-                metadataUuid,
+//        eventPublisher.publish(new ImageUploadedEvent(
+//                imageUuid,
+//                metadataUuid,
+//                deviceUuid,
+//                gcsPath,
+//                now
+//        ));
+        
+        try {
+        	eventPublisher.publish(
+                new ImageSavedEvent(imageUuid, deviceUuid, now)
+            );
+        } catch (Exception ex) {
+            log.error("Redis down. Falling back to direct DB update");
+
+            jpaRepo.upsert(
                 deviceUuid,
-                gcsPath,
+                imageUuid,
                 now
-        ));
+            );
+        }
 
         return ImageUploadResponse.builder()
                 .imageMetadataUuid(metadataUuid)
