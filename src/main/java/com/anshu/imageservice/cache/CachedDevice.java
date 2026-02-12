@@ -16,4 +16,5 @@ public class CachedDevice implements Serializable {
     private String deviceType;
     private String status;
     private Instant registeredAt;
+    private UUID userUuid;
 }

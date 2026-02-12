@@ -10,4 +10,5 @@ public interface DeviceCacheRepository extends JpaRepository<DeviceCache,Long> {
 
 
     Optional<DeviceCache> findByUuid(UUID deviceUuid);
+   // boolean existsByUser_UuidAndUuid(UUID userUuid, UUID deviceUuid);
 }

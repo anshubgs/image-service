@@ -2,8 +2,11 @@ package com.anshu.imageservice.core.infrastructure.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -12,6 +15,8 @@ import java.util.UUID;
 @Entity
 @Builder
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)  // ✅ Required by JPA
+@AllArgsConstructor
 @Table(name = "device_summary", schema = "image")
 public class DeviceSummary {
 	
@@ -27,6 +32,9 @@ public class DeviceSummary {
 
     @Column(name = "total_images", nullable = false)
     private int totalImages;
+    
+    @Column(name = "device_name")
+    private String deviceName;
 
     @Column(name = "active_images")
     private int activeImages;

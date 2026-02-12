@@ -39,4 +39,7 @@ public class DeviceCache {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+    
+    @Column(name = "user_uuid")
+    private UUID userUuid; // logical relation, not FK
 }

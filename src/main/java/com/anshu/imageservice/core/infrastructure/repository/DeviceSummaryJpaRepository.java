@@ -1,5 +1,7 @@
 package com.anshu.imageservice.core.infrastructure.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.anshu.imageservice.core.infrastructure.entity.DeviceSummary;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -51,5 +54,13 @@ public interface DeviceSummaryJpaRepository
             UUID imageUuid,
             LocalDateTime capturedAt
     );
+
+    
+    @Query("select coalesce(sum(ds.totalImages),0) from DeviceSummary ds")
+    long sumTotalImages();
+
+    List<DeviceSummary> findAllByOrderByLastImageAtDesc();
+    
+    Page<DeviceSummary> findAllByOrderByLastImageAtDesc(Pageable pageable);
 
 }

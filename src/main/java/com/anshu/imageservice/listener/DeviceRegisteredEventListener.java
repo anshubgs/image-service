@@ -52,6 +52,7 @@ public class DeviceRegisteredEventListener {
                     .deviceType(event.getDeviceType())
                     .status(event.getStatus())
                     .registeredAt(event.getRegisteredAt())
+                    .userUuid(event.getUserUuid())
                     .build();
 
             deviceCacheService.save(cachedDevice);
@@ -67,6 +68,7 @@ public class DeviceRegisteredEventListener {
             deviceCache.setStatus(event.getStatus());
             deviceCache.setDeviceSecret(event.getDeviceSecret());
             deviceCache.setLastSyncedAt(LocalDateTime.now());
+            deviceCache.setUserUuid(event.getUserUuid());
 
             deviceCacheRepository.save(deviceCache);
 
