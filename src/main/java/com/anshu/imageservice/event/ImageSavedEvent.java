@@ -6,5 +6,6 @@ import java.util.UUID;
 public record ImageSavedEvent(
         UUID imageUuid,
         UUID deviceUuid,
-        LocalDateTime capturedAt
+        LocalDateTime capturedAt,
+        String deviceName
 ) {}

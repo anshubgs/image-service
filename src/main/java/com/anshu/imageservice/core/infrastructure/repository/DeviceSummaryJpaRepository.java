@@ -25,6 +25,7 @@ public interface DeviceSummaryJpaRepository
         INSERT INTO image.device_summary (
             uuid,
             device_uuid,
+            device_name,
             total_images,
             active_images,
             last_image_at,
@@ -34,6 +35,7 @@ public interface DeviceSummaryJpaRepository
         VALUES (
             gen_random_uuid(),
             :deviceUuid,
+            :deviceName,
             1,
             1,
             :capturedAt,
@@ -46,14 +48,17 @@ public interface DeviceSummaryJpaRepository
             active_images = image.device_summary.active_images + 1,
             last_image_at = EXCLUDED.last_image_at,
             latest_image_uuid = EXCLUDED.latest_image_uuid,
+            device_name = EXCLUDED.device_name,
             updated_at = CURRENT_TIMESTAMP
         """,
         nativeQuery = true)
     void upsert(
             UUID deviceUuid,
             UUID imageUuid,
-            LocalDateTime capturedAt
+            LocalDateTime capturedAt,
+            String deviceName
     );
+
 
     
     @Query("select coalesce(sum(ds.totalImages),0) from DeviceSummary ds")

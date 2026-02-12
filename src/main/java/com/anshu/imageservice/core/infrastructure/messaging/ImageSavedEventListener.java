@@ -30,10 +30,13 @@ public class ImageSavedEventListener
             String imageStr = message.getValue().get("imageUuid");
             String deviceStr = message.getValue().get("deviceUuid");
             String capturedStr = message.getValue().get("capturedAt");
+            //String deviceName = message.getValue().get("deviceName");
 
-            log.info("📦 Extracted Fields | imageUuid={} | deviceUuid={} | capturedAt={}",
-                    imageStr, deviceStr, capturedStr);
+            String deviceName = message.getValue().get("deviceName"); // ✅ add this
 
+            log.info("📦 Extracted Fields | imageUuid={} | deviceUuid={} | capturedAt={} | deviceName={}",
+                    imageStr, deviceStr, capturedStr, deviceName);
+            
             UUID imageUuid = UUID.fromString(imageStr);
             UUID deviceUuid = UUID.fromString(deviceStr);
             LocalDateTime capturedAt = LocalDateTime.parse(capturedStr);
@@ -41,7 +44,7 @@ public class ImageSavedEventListener
             log.info("✅ Parsed Successfully | device={}", deviceUuid);
 
             log.info("🗄️ Calling DB UPSERT...");
-            deviceSummaryRepository.upsert(deviceUuid, imageUuid, capturedAt);
+            deviceSummaryRepository.upsert(deviceUuid, imageUuid, capturedAt, deviceName);
 
             log.info("✅ [SUMMARY UPSERTED SUCCESS] device={}", deviceUuid);
 

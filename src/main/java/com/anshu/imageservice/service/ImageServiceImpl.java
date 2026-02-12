@@ -7,8 +7,10 @@ import com.anshu.imageservice.dto.ImageUploadResponse;
 import com.anshu.imageservice.event.ImageEventPublisher;
 import com.anshu.imageservice.event.ImageSavedEvent;
 import com.anshu.imageservice.event.ImageUploadedEvent;
+import com.anshu.imageservice.model.DeviceCache;
 import com.anshu.imageservice.model.Image;
 import com.anshu.imageservice.model.ImageMetadata;
+import com.anshu.imageservice.repository.DeviceCacheRepository;
 import com.anshu.imageservice.repository.ImageMetadataRepository;
 import com.anshu.imageservice.repository.ImageRepository;
 
@@ -39,6 +41,7 @@ public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
     private final ImageSavedEventPublisher eventPublisher;
     private final DeviceSummaryJpaRepository jpaRepo;
+    private final DeviceCacheRepository cacheRepo;
 
 
     /*private final ImageRepository imageRepository;
@@ -47,7 +50,8 @@ public class ImageServiceImpl implements ImageService {
 
     public ImageServiceImpl(DeviceValidationService deviceValidationService,
     		ImageSavedEventPublisher eventPublisher,DeviceServiceClient serviceClient,StorageService storageService,
-                          ImageMetadataRepository imageMetadataRepository,ImageRepository imageRepository,DeviceSummaryJpaRepository jpaRepo) {
+                          ImageMetadataRepository imageMetadataRepository,ImageRepository imageRepository,DeviceSummaryJpaRepository jpaRepo,
+                          DeviceCacheRepository cacheRepo) {
         this.deviceValidationService = deviceValidationService;
         this.eventPublisher = eventPublisher;
         this.serviceClient = serviceClient;
@@ -55,6 +59,7 @@ public class ImageServiceImpl implements ImageService {
         this.imageMetadataRepository = imageMetadataRepository;
         this.imageRepository = imageRepository;
         this.jpaRepo = jpaRepo;
+        this.cacheRepo = cacheRepo;
     }
 
 
@@ -72,6 +77,7 @@ public class ImageServiceImpl implements ImageService {
         UUID imageUuid = UUID.randomUUID();
         UUID metadataUuid = UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+      //  String 
 
         // 2️⃣ Upload to GCS
         String gcsPath =
@@ -119,9 +125,15 @@ public class ImageServiceImpl implements ImageService {
 //                now
 //        ));
         
+        
+        //Get Device Name
+        DeviceCache cache = cacheRepo.findByUuid(deviceUuid).orElseThrow(() -> new RuntimeException("Device not found in cache"));
+        String deviceName = cache.getDeviceName();
+        
+        
         try {
         	eventPublisher.publish(
-                new ImageSavedEvent(imageUuid, deviceUuid, now)
+                new ImageSavedEvent(imageUuid, deviceUuid, now, deviceName)
             );
         } catch (Exception ex) {
             log.error("Redis down. Falling back to direct DB update");
@@ -129,7 +141,8 @@ public class ImageServiceImpl implements ImageService {
             jpaRepo.upsert(
                 deviceUuid,
                 imageUuid,
-                now
+                now,
+                deviceName
             );
         }
 
