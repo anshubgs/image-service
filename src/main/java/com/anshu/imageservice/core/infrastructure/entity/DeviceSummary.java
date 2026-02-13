@@ -44,6 +44,10 @@ public class DeviceSummary {
 
     @Column(name = "latest_image_uuid")
     private UUID latestImageUuid;
+    
+    @Column(name = "latest_image_url")
+    private String latestImageUrl;
+
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;

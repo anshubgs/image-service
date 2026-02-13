@@ -81,7 +81,8 @@ public class ImageServiceImpl implements ImageService {
 
         // 2️⃣ Upload to GCS
         String gcsPath =
-                storageService.store(imageBytes, deviceUuid, imageUuid);
+                storageService.storeLatest(imageBytes, deviceUuid);
+
 
         log.info("[GCS] Image uploaded | image={} | path={}", imageUuid, gcsPath);
 
@@ -133,7 +134,7 @@ public class ImageServiceImpl implements ImageService {
         
         try {
         	eventPublisher.publish(
-                new ImageSavedEvent(imageUuid, deviceUuid, now, deviceName)
+                new ImageSavedEvent(imageUuid, deviceUuid, now, deviceName,  gcsPath )
             );
         } catch (Exception ex) {
             log.error("Redis down. Falling back to direct DB update");
@@ -142,7 +143,8 @@ public class ImageServiceImpl implements ImageService {
                 deviceUuid,
                 imageUuid,
                 now,
-                deviceName
+                deviceName,
+                gcsPath 
             );
         }
 

@@ -11,5 +11,6 @@ public record DeviceImageSummaryResponse(
         int totalImages,
         int activeImages,
         LocalDateTime lastImageAt,
-        UUID latestImageUuid
+        UUID latestImageUuid,
+        String latestImageUrl 
 ) {}

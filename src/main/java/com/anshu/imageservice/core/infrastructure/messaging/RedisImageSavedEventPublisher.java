@@ -26,7 +26,8 @@ public class RedisImageSavedEventPublisher implements ImageSavedEventPublisher {
                         "imageUuid", event.imageUuid().toString(),
                         "deviceUuid", event.deviceUuid().toString(),
                         "capturedAt", event.capturedAt().toString(),
-                        "deviceName", event.deviceName().toString()
+                        "deviceName", event.deviceName().toString(),
+                        "imageUrl", event.imageUrl()   
                 )
         );
 

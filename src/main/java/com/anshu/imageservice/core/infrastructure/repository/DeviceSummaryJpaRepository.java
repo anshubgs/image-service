@@ -20,6 +20,7 @@ public interface DeviceSummaryJpaRepository
 
     Optional<DeviceSummary> findByDeviceUuid(UUID deviceUuid);
 
+ 
     @Modifying
     @Query(value = """
         INSERT INTO image.device_summary (
@@ -30,6 +31,7 @@ public interface DeviceSummaryJpaRepository
             active_images,
             last_image_at,
             latest_image_uuid,
+            latest_image_url,
             updated_at
         )
         VALUES (
@@ -40,6 +42,7 @@ public interface DeviceSummaryJpaRepository
             1,
             :capturedAt,
             :imageUuid,
+            :imageUrl,
             CURRENT_TIMESTAMP
         )
         ON CONFLICT (device_uuid)
@@ -48,6 +51,7 @@ public interface DeviceSummaryJpaRepository
             active_images = image.device_summary.active_images + 1,
             last_image_at = EXCLUDED.last_image_at,
             latest_image_uuid = EXCLUDED.latest_image_uuid,
+            latest_image_url = EXCLUDED.latest_image_url,   -- ✅ NEW
             device_name = EXCLUDED.device_name,
             updated_at = CURRENT_TIMESTAMP
         """,
@@ -56,8 +60,10 @@ public interface DeviceSummaryJpaRepository
             UUID deviceUuid,
             UUID imageUuid,
             LocalDateTime capturedAt,
-            String deviceName
+            String deviceName,
+            String imageUrl   
     );
+
 
 
     

@@ -7,5 +7,6 @@ public record ImageSavedEvent(
         UUID imageUuid,
         UUID deviceUuid,
         LocalDateTime capturedAt,
-        String deviceName
+        String deviceName,
+        String imageUrl  
 ) {}

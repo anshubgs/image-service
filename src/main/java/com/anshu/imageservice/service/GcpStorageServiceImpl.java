@@ -1,6 +1,9 @@
 package com.anshu.imageservice.service;
 
 import com.google.cloud.storage.BlobId;
+import java.net.URL;
+import java.util.concurrent.TimeUnit;
+
 import java.util.UUID;
 
 import com.google.cloud.storage.BlobInfo;
@@ -29,11 +32,12 @@ public class GcpStorageServiceImpl implements StorageService {
     }
 
     @Override
-    public String store(byte[] imageBytes, UUID deviceUuid, UUID imageUuid) {
+    public String storeLatest(byte[] imageBytes, UUID deviceUuid) {
 
         try {
+
             String objectName =
-                    basePath + "/" + deviceUuid + "/" + imageUuid + ".jpg";
+                    basePath + "/" + deviceUuid + "/latest.jpg";
 
             BlobId blobId = BlobId.of(bucketName, objectName);
 
@@ -41,18 +45,42 @@ public class GcpStorageServiceImpl implements StorageService {
                     .setContentType("image/jpeg")
                     .build();
 
-            storage.create(blobInfo, imageBytes);
+            storage.create(blobInfo, imageBytes); // overwrite automatically
 
-            log.info("[GCS] Image uploaded | bucket={} | object={}",
+            log.info("[GCS] latest.jpg overwritten | bucket={} | object={}",
                     bucketName, objectName);
 
-            // ✅ RETURN ONLY OBJECT PATH
             return objectName;
 
         } catch (Exception e) {
-            log.error("[GCS] Image upload failed", e);
+            log.error("[GCS] latest.jpg upload failed", e);
             throw new RuntimeException("Failed to upload image to GCS");
         }
     }
+
+    @Override
+    public String generateSignedUrl(String objectPath) {
+
+        try {
+
+            BlobInfo blobInfo = BlobInfo.newBuilder(
+                    BlobId.of(bucketName, objectPath)
+            ).build();
+
+            URL signedUrl = storage.signUrl(
+                    blobInfo,
+                    15, // validity
+                    TimeUnit.MINUTES,
+                    Storage.SignUrlOption.withV4Signature()
+            );
+
+            return signedUrl.toString();
+
+        } catch (Exception e) {
+            log.error("[GCS] Failed to generate signed URL", e);
+            throw new RuntimeException("Failed to generate signed URL");
+        }
+    }
+
 
 }

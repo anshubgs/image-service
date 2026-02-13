@@ -9,6 +9,7 @@ import com.anshu.imageservice.core.api.v1.dto.DeviceImageSummaryResponse;
 import com.anshu.imageservice.core.api.v1.dto.PaginatedDeviceImageSummaryResponse;
 import com.anshu.imageservice.core.domain.repository.DeviceSummaryRepository;
 import com.anshu.imageservice.security.UserAccessValidator;
+import com.anshu.imageservice.service.StorageService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +19,8 @@ public class DeviceImageSummaryApplicationService {
 
     private final DeviceSummaryRepository repository;
     private final UserAccessValidator accessValidator;
+    private final StorageService storageService;
+
 
     public PaginatedDeviceImageSummaryResponse getDeviceImageSummaries(
             UUID userUuid,
@@ -32,16 +35,27 @@ public class DeviceImageSummaryApplicationService {
 
         var content = pageResult.getContent()
                 .stream()
-                .map(ds -> DeviceImageSummaryResponse.builder()
+                .map(ds -> { 
+                	String signedUrl = null;
+
+                // 🔥 Convert object path to signed URL
+                if (ds.getLatestImageUrl() != null) {
+                    signedUrl = storageService
+                            .generateSignedUrl(ds.getLatestImageUrl());
+                }
+                
+               return DeviceImageSummaryResponse.builder()
                         .deviceUuid(ds.getDeviceUuid())
                         .deviceName(ds.getDeviceName())
                         .totalImages(ds.getTotalImages())
                         .activeImages(ds.getActiveImages())
                         .lastImageAt(ds.getLastImageAt())
                         .latestImageUuid(ds.getLatestImageUuid())
-                        .build()
-                )
+                        .latestImageUrl(signedUrl)
+                        .build();
+                })
                 .toList();
+        
 
         return PaginatedDeviceImageSummaryResponse.builder()
                 .content(content)

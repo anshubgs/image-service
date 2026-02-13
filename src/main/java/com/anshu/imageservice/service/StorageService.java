@@ -9,5 +9,8 @@ public interface StorageService {
      */
   //  String store(byte[] imageBytes, String imageUuid);
 
-	String store(byte[] imageBytes, UUID deviceUuid, UUID imageUuid);
+	//String store(byte[] imageBytes, UUID deviceUuid, UUID imageUuid);
+	 String storeLatest(byte[] imageBytes, UUID deviceUuid);
+	 
+	 String generateSignedUrl(String objectPath);
 }

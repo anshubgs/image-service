@@ -15,7 +15,7 @@
        <include file="db/changelog/v6-image-add-device-uuid-to-image-metadata.xml"/>
               <include file="db/changelog/v7-image-create-device-summary.xml"/>
            <include file="db/changelog/v8-image-add-device-name-to-device-summary.xml"/>
-                <!--    <include file="db/changelog/v9-image-add-user-device-relation.xml"/> --> 
+              <include file="db/changelog/v9-image-add-latest-image-url.xml"/> 
      
 
 
