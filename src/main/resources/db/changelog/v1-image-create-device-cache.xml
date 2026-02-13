@@ -9,7 +9,6 @@
     <changeSet id="001-create-device-cache" author="anshu">
         <createTable tableName="device_cache" schemaName="image">
 
-
             <column name="id" type="BIGSERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -21,13 +20,14 @@
             <column name="device_name" type="VARCHAR(100)"/>
             <column name="device_type" type="VARCHAR(50)"/>
             <column name="status" type="VARCHAR(20)"/>
-
             <column name="device_secret" type="VARCHAR(100)"/>
-
             <column name="last_synced_at" type="TIMESTAMP"/>
             <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
-        </createTable>
 
+            <!-- New column for user UUID -->
+            <column name="user_uuid" type="UUID"/>
+            
+        </createTable>
     </changeSet>
 
 </databaseChangeLog>

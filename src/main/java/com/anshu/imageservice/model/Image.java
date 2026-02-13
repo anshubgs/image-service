@@ -1,5 +1,6 @@
 package com.anshu.imageservice.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,6 +32,7 @@ public class Image {
     private String status;
 
     @Column(name = "captured_at", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime capturedAt;
 
     @Column(name = "created_at")

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <!-- Create cached_user table -->
+    <changeSet id="v5-create-cached-user-table" author="anshu">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="image" tableName="cached_user"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="cached_user" schemaName="image">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_uuid" type="UUID">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"
+                    defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"
+                    defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create index on user_uuid -->
+    <changeSet id="v3-create-cached-user-uuid-index" author="dev">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_cached_user_user_uuid"
+                             schemaName="device"/>
+            </not>
+        </preConditions>
+
+        <createIndex
+                indexName="idx_cached_user_user_uuid"
+                tableName="cached_user"
+                schemaName="image">
+            <column name="user_uuid"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Insert dummy admin user -->
+    <changeSet id="v5-insert-admin-user" author="dev">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(1)
+                    FROM image.cached_user
+                    WHERE user_uuid = '111e8400-e29b-41d4-a716-446655440000'
+                </sqlCheck>
+            </not>
+        </preConditions>
+
+        <insert tableName="cached_user" schemaName="image">
+            <column name="user_uuid"
+                    value="111e8400-e29b-41d4-a716-446655440000"/>
+            <column name="role" value="ADMIN"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

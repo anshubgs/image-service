@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="v4-image-insertDataInCachedDevice.xml" author="anshu">
+
+        <insert tableName="device_cache" schemaName="image">
+            <column name="uuid" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="device_name" value="Camera-01"/>
+            <column name="device_type" value="CAMERA"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="device_secret" value="secret-123"/>
+            <column name="last_synced_at" valueDate="2026-01-18T10:00:00"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

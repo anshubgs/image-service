@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+	<changeSet id="20260210-02-create-device-summary"
+		author="anshu">
+
+		<createTable tableName="device_summary" schemaName="image">
+			<!-- Surrogate PK -->
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+
+			<!-- Business UUID for this summary row -->
+			<column name="uuid" type="UUID">
+				<constraints nullable="false" unique="true" />
+			</column>
+
+			<!-- Device reference -->
+			<column name="device_uuid" type="UUID">
+				<constraints nullable="false" unique="true" />
+			</column>
+
+			<column name="total_images" type="INT" defaultValueNumeric="0">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="active_images" type="INT"
+				defaultValueNumeric="0" />
+
+			<column name="last_image_at" type="TIMESTAMP" />
+
+			<column name="latest_image_uuid" type="UUID" />
+
+			<column name="updated_at" type="TIMESTAMP"
+				defaultValueComputed="CURRENT_TIMESTAMP">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<!-- Index on uuid for fast lookup -->
+		<createIndex indexName="idx_device_summary_uuid"
+			schemaName="image" tableName="device_summary" unique="true">
+			<column name="uuid" />
+		</createIndex>
+
+		<!-- Index on device_uuid for fast lookup -->
+		<createIndex indexName="idx_device_summary_device_uuid"
+			schemaName="image" tableName="device_summary" unique="true">
+			<column name="device_uuid" />
+		</createIndex>
+
+		<!-- Optional: index on last_image_at for recent sorting -->
+		<createIndex indexName="idx_device_summary_last_image"
+			schemaName="image" tableName="device_summary">
+			<column name="last_image_at" />
+		</createIndex>
+
+
+	</changeSet>
+
+</databaseChangeLog>

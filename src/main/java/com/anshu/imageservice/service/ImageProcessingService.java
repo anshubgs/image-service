@@ -1,4 +1,6 @@
 package com.anshu.imageservice.service;
 
-public class ImageProcessingService {
+public interface ImageProcessingService {
+
+    void process(String objectPath);
 }

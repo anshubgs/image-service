@@ -11,6 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Data
 public class ImageMetadata {
 
     @Id
@@ -22,6 +23,10 @@ public class ImageMetadata {
 
     @Column(name = "image_uuid", nullable = false)
     private UUID imageUuid;
+    
+
+    @Column(name = "device_uuid")
+    private UUID deviceUuid;
 
     @Column(name = "original_filename")
     private String originalFilename;
