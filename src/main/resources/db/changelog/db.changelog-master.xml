@@ -16,6 +16,7 @@
               <include file="db/changelog/v7-image-create-device-summary.xml"/>
            <include file="db/changelog/v8-image-add-device-name-to-device-summary.xml"/>
               <include file="db/changelog/v9-image-add-latest-image-url.xml"/> 
+           <!--   <include file="db/changelog/v10-image-add-image-index.xml"/>  -->  
      
 
 
