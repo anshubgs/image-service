@@ -21,7 +21,6 @@ public class DeviceImageSummaryApplicationService {
     private final UserAccessValidator accessValidator;
     private final StorageService storageService;
 
-
     public PaginatedDeviceImageSummaryResponse getDeviceImageSummaries(
             UUID userUuid,
             String role,
@@ -35,27 +34,19 @@ public class DeviceImageSummaryApplicationService {
 
         var content = pageResult.getContent()
                 .stream()
-                .map(ds -> { 
-                	String signedUrl = null;
-
-                // 🔥 Convert object path to signed URL
-                if (ds.getLatestImageUrl() != null) {
-                    signedUrl = storageService
-                            .generateSignedUrl(ds.getLatestImageUrl());
-                }
-                
-               return DeviceImageSummaryResponse.builder()
+                .map(ds -> DeviceImageSummaryResponse.builder()
                         .deviceUuid(ds.getDeviceUuid())
                         .deviceName(ds.getDeviceName())
                         .totalImages(ds.getTotalImages())
                         .activeImages(ds.getActiveImages())
                         .lastImageAt(ds.getLastImageAt())
                         .latestImageUuid(ds.getLatestImageUuid())
-                        .latestImageUrl(signedUrl)
-                        .build();
-                })
+                        .latestImageUrl(
+                                generateSignedUrlSafely(ds.getLatestImageUrl())
+                        )
+                        .build()
+                )
                 .toList();
-        
 
         return PaginatedDeviceImageSummaryResponse.builder()
                 .content(content)
@@ -65,5 +56,19 @@ public class DeviceImageSummaryApplicationService {
                 .totalPages(pageResult.getTotalPages())
                 .last(pageResult.isLast())
                 .build();
+    }
+
+    /**
+     * 🔥 Safe Signed URL generator
+     * Prevents null/blank issues
+     * Easy to plug caching later
+     */
+    private String generateSignedUrlSafely(String objectPath) {
+
+        if (objectPath == null || objectPath.isBlank()) {
+            return null;
+        }
+
+        return storageService.generateSignedUrl(objectPath);
     }
 }
